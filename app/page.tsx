@@ -17,7 +17,7 @@ export default function Portfolio() {
         {/* HEADER */}
         <header className="flex justify-between items-center mb-16">
           <h1 className="text-xl font-semibold tracking-wide">
-            Ashutosh.ai <span className="text-sm text-gray-400">⚡ GenAI Engineer</span>
+            Ashutosh Sharma <span className="text-sm text-gray-400">⚡ GenAI Engineer</span>
           </h1>
 
           <div className="flex gap-3 items-center">
