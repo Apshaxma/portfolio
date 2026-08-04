@@ -1,3 +1,5 @@
+"use node";
+
 import { action } from "./_generated/server";
 import { v } from "convex/values";
 
@@ -144,5 +146,26 @@ export const pushRepo = action({
       parent: parentSha ? "stacked" : "root",
       pages,
     };
+  },
+});
+
+// Small helper so we can confirm the token is present without pushing anything.
+export const tokenStatus = action({
+  args: {},
+  handler: async () => {
+    const token = process.env.GITHUB_TOKEN;
+    if (!token) return { ok: false, reason: "GITHUB_TOKEN not set in Convex env" };
+    const res = await fetch("https://api.github.com/user", {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        Accept: "application/vnd.github+json",
+        "User-Agent": "portfolio-deploy",
+      },
+    });
+    const data = (await res.json()) as { login?: string; message?: string };
+    if (!res.ok) {
+      return { ok: false, reason: `GitHub says: ${res.status} ${data.message ?? ""}` };
+    }
+    return { ok: true, login: data.login };
   },
 });
