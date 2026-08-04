@@ -1,0 +1,30 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-ssr/
+
+# Environment / secrets — NEVER commit these
+# (.env.production is intentionally NOT ignored: it contains only the public
+#  Convex endpoint URL needed by the GitHub Pages build.)
+.env
+.env.local
+.env.*.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+
+# TypeScript incremental build info
+*.tsbuildinfo
+
+# Scaffolded sibling repos (VideoIQ Summarizer / Image Caption Studio)
+# are separate git repos — exclude them from this one.
+/videoiq-summarizer/
+/image-caption-studio/

@@ -1,1 +1,21 @@
-[FILE_TOO_LARGE]: The combined read_files output exceeded the 100,000 character hard limit. This file was truncated after 0 characters. Read it separately or use code_search for the relevant section.
+import tailwindcss from "@tailwindcss/vite";
+import react from "@vitejs/plugin-react";
+import path from "path";
+import { defineConfig } from "vite";
+
+// Temporary config used ONLY to produce the static bundle for GitHub Pages.
+// Mirrors vite.config.ts (react + tailwind + @ alias + React dedupe) but omits
+// the vlyPlugin, which requires platform services unavailable in this build
+// container. Not used by the dev server.
+export default defineConfig({
+  plugins: [react(), tailwindcss()],
+  resolve: {
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+    },
+    dedupe: ["react", "react/jsx-runtime", "react-dom", "react-dom/client"],
+  },
+  build: {
+    sourcemap: false,
+  },
+});

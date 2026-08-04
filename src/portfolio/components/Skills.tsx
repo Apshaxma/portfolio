@@ -69,6 +69,52 @@ export function Skills() {
             {visible.map((group) => (
               <div
                 key={group.id}
-                className="rounded-3xl border border-whit
-
-[FILE_TOO_LARGE]: The combined read_files output exceeded the 100,000 character hard limit. This file was truncated after 2,662 characters. Read it separately or use code_search for the relevant section.
+                className="rounded-3xl border border-white/[0.07] bg-white/[0.02] p-7 backdrop-blur-sm"
+              >
+                <div className="mb-6 flex items-center gap-3">
+                  <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-mint/20 to-violet/20 text-mint">
+                    <group.icon className="h-4.5 w-4.5" />
+                  </span>
+                  <h3 className="font-display text-lg font-semibold text-foreground">
+                    {group.label}
+                  </h3>
+                </div>
+                <div className="space-y-5">
+                  {group.skills.map((skill, i) => (
+                    <div key={skill.name} className="group">
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-sm text-foreground">
+                          <skill.icon className="h-4 w-4 text-muted-foreground transition-colors group-hover:text-mint" />
+                          {skill.name}
+                        </span>
+                        <span className="font-mono text-xs text-muted-foreground">
+                          {skill.level}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 overflow-hidden rounded-full bg-white/[0.06]">
+                        <motion.div
+                          className="h-full rounded-full bg-gradient-to-r from-mint to-violet"
+                          initial={{ width: reduce ? `${skill.level}%` : 0 }}
+                          whileInView={{ width: `${skill.level}%` }}
+                          viewport={{ once: true }}
+                          transition={{
+                            duration: 1,
+                            delay: 0.1 + i * 0.06,
+                            ease: "easeOut",
+                          }}
+                        />
+                      </div>
+                      <p className="mt-1.5 text-xs text-muted-foreground/80">
+                        {skill.blurb}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </motion.div>
+        </AnimatePresence>
+      </div>
+    </section>
+  );
+}
