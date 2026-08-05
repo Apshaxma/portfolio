@@ -133,7 +133,7 @@ createRoot(document.getElementById("root")!).render(
         <VlyToolbar />
       </ToolbarErrorBoundary>
       <ConvexAuthProvider client={convex}>
-        <BrowserRouter>
+        <BrowserRouter basename="/portfolio">
           <RouteSyncer />
           <RestoreGhPagesPath />
           <Suspense fallback={<RouteLoading />}>
