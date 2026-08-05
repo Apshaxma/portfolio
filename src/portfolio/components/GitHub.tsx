@@ -228,7 +228,7 @@ export function GitHub() {
     <section id="github" className="relative py-28">
       <div className="mx-auto max-w-6xl px-5 sm:px-6">
         <SectionHeading
-          index="06"
+          index="05"
           eyebrow="GitHub"
           title={
             <>

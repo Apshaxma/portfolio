@@ -401,51 +401,6 @@ export const EDUCATION: TimelineItem[] = [
 ];
 
 /* ============================================================================
- * CERTIFICATIONS (placeholders — replace with your real ones)
- * ========================================================================== */
-export const CERTIFICATIONS = [
-  {
-    title: "Machine Learning Specialization",
-    issuer: "Placeholder — add your certification",
-    icon: Brain,
-  },
-  {
-    title: "Deep Learning Specialization",
-    issuer: "Placeholder — add your certification",
-    icon: LineChart,
-  },
-  {
-    title: "LangChain for LLM App Development",
-    issuer: "Placeholder — add your certification",
-    icon: Link2,
-  },
-];
-
-/* ============================================================================
- * TESTIMONIALS (placeholders — replace with real quotes)
- * ========================================================================== */
-export const TESTIMONIALS = [
-  {
-    quote:
-      "Placeholder quote — “Ashutosh turned a vague idea into a working multi-agent system faster than we expected. Sharp, curious, ships.”",
-    name: "Your Name",
-    role: "Hiring Manager · AI Startup",
-  },
-  {
-    quote:
-      "Placeholder quote — “Rare combination of research intuition and engineering discipline. His RAG work was production-ready.”",
-    name: "Your Name",
-    role: "Tech Lead · AI Company",
-  },
-  {
-    quote:
-      "Placeholder quote — “Ashutosh is the kind of engineer every AI team wants — fluent in LangGraph, FastAPI and shipping.”",
-    name: "Your Name",
-    role: "Recruiter · Frontier AI Lab",
-  },
-];
-
-/* ============================================================================
  * ANIMATED TERMINAL SCRIPT
  * ========================================================================== */
 export const TERMINAL_SCRIPT = [

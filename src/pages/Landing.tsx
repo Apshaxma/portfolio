@@ -3,7 +3,6 @@ import { lazy, Suspense, useEffect, useState } from "react";
 import { About } from "@/portfolio/components/About";
 import { Assistant } from "@/portfolio/components/Assistant";
 import { Backdrop } from "@/portfolio/components/Backdrop";
-import { Certifications } from "@/portfolio/components/Certifications";
 import { Contact } from "@/portfolio/components/Contact";
 import { CursorGlow } from "@/portfolio/components/CursorGlow";
 import { Experience } from "@/portfolio/components/Experience";
@@ -14,7 +13,6 @@ import { Navbar } from "@/portfolio/components/Navbar";
 import { Projects } from "@/portfolio/components/Projects";
 import { ScrollProgress } from "@/portfolio/components/ScrollProgress";
 import { Skills } from "@/portfolio/components/Skills";
-import { Testimonials } from "@/portfolio/components/Testimonials";
 import { CommandPalette } from "@/portfolio/components/CommandPalette";
 
 export default function Landing() {
@@ -60,9 +58,7 @@ export default function Landing() {
         <Skills />
         <Projects />
         <Experience />
-        <Certifications />
         <GitHub />
-        <Testimonials />
         <Contact />
       </main>
 
