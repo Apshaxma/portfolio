@@ -3,6 +3,11 @@
 // Freebuff Keys/API keys tab). Uses raw fetch against the action HTTP endpoint,
 // because ConvexHttpClient hangs in this browser container.
 //
+// Files are sent in SMALL stacked batches (one commit per batch) so each action
+// call stays well under payload/time limits and the browser tab doesn't die
+// mid-run. Batches stack on the previous commit, so the final repo contains
+// every file.
+//
 // Usage:
 //   node /tmp/push-repos.mjs <repoName> <dir> "<description>" [pages]
 
@@ -11,6 +16,8 @@ import { join } from "path";
 
 const URL = "https://majestic-wildcat-199.convex.cloud";
 const ENDPOINT = URL + "/api/action";
+
+const MAX_BATCH_BYTES = 120_000; // ~120KB of base64 per action call
 
 async function runAction(path, args) {
   const res = await fetch(ENDPOINT, {
@@ -48,6 +55,23 @@ function walk(root, ignoreNames = []) {
   return files;
 }
 
+function chunk(files, maxBytes) {
+  const chunks = [];
+  let current = [];
+  let size = 0;
+  for (const f of files) {
+    if (current.length > 0 && size + f.contentBase64.length > maxBytes) {
+      chunks.push(current);
+      current = [];
+      size = 0;
+    }
+    current.push(f);
+    size += f.contentBase64.length;
+  }
+  if (current.length > 0) chunks.push(current);
+  return chunks;
+}
+
 const [, , repo, dir, description, pagesFlag] = process.argv;
 const enablePages = pagesFlag === "pages";
 
@@ -65,7 +89,7 @@ if (!status?.ok) {
 }
 
 // Apshaxma.github.io (portfolio root) — never ship secrets, deps, or the
-// sibling scaffold repos.
+// sibling scaffold repos; skip platform/tooling files that don't belong.
 const IGNORE =
   repo === "Apshaxma.github.io"
     ? [
@@ -80,18 +104,37 @@ const IGNORE =
         "videoiq-summarizer",
         "image-caption-studio",
         ".DS_Store",
+        "tmp",
+        "main.ts",
+        "integrations.md",
         "*.tsbuildinfo",
       ]
     : [];
 
 const files = walk(dir, IGNORE);
-console.log(`pushing ${files.length} files to ${repo} ...`);
+const batches = chunk(files, MAX_BATCH_BYTES);
+console.log(
+  `pushing ${files.length} files (${batches.length} batch${batches.length === 1 ? "" : "es"}) to ${repo} ...`,
+);
 
-const res = await runAction("github:pushRepo", {
-  repo,
-  description: description ?? "Deployed from Freebuff",
-  files,
-  enablePages,
-  message: `Deploy ${repo} (${files.length} files)`,
-});
-console.log(JSON.stringify(res, null, 2));
+let last = null;
+for (let i = 0; i < batches.length; i++) {
+  const batch = batches[i];
+  const isLast = i === batches.length - 1;
+  console.log(
+    `  batch ${i + 1}/${batches.length}: ${batch.length} files (~${Math.round(batch.reduce((s, f) => s + f.contentBase64.length, 0) / 1024)}KB)`,
+  );
+  last = await runAction("github:pushRepo", {
+    repo,
+    description: description ?? "Deployed from Freebuff",
+    files: batch,
+    enablePages: enablePages && isLast,
+    message:
+      batches.length === 1
+        ? `Deploy ${repo} (${batch.length} files)`
+        : `Deploy ${repo} (${i + 1}/${batches.length}, ${batch.length} files)`,
+  });
+  console.log(`  -> commit ${last.commit} (${last.files} files, ${last.parent})`);
+}
+
+console.log(JSON.stringify(last, null, 2));

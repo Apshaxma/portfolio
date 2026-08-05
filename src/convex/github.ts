@@ -1,6 +1,7 @@
 "use node";
 
 import { action } from "./_generated/server";
+import { api } from "./_generated/api";
 import { v } from "convex/values";
 
 // Pushes repository contents to GitHub using the GITHUB_TOKEN that the user
@@ -146,6 +147,35 @@ export const pushRepo = action({
       parent: parentSha ? "stacked" : "root",
       pages,
     };
+  },
+});
+
+// Schedules a `pushRepo` run on the Convex scheduler so the heavy GitHub API
+// work happens server-side, fully decoupled from the browser tab / terminal
+// (which can die mid-request in WebContainer). The caller sends ONE chunk per
+// call (keeps args small); chunks are staggered by `delayMs` so they stack
+// commits without racing on the branch ref.
+export const schedulePush = action({
+  args: {
+    repo: v.string(),
+    description: v.optional(v.string()),
+    files: v.array(
+      v.object({ path: v.string(), contentBase64: v.string() })
+    ),
+    message: v.optional(v.string()),
+    enablePages: v.optional(v.boolean()),
+    delayMs: v.optional(v.number()),
+  },
+  handler: async (ctx, args) => {
+    const delayMs = args.delayMs ?? 0;
+    await ctx.scheduler.runAfter(delayMs, api.github.pushRepo, {
+      repo: args.repo,
+      description: args.description,
+      files: args.files,
+      message: args.message,
+      enablePages: args.enablePages,
+    });
+    return { scheduled: true, repo: args.repo, files: args.files.length, delayMs };
   },
 });
 
