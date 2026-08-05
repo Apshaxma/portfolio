@@ -54,7 +54,8 @@ export const pushRepo = action({
       );
     }
 
-    // 1) Create the repo if it does not exist yet.
+    // 1) Create the repo if it does not exist yet. auto_init gives it an
+    //    initial commit + default branch so the Git Data API accepts blobs.
     let repoInfo: Record<string, unknown>;
     try {
       repoInfo = await gh(token, "GET", `/repos/${OWNER}/${args.repo}`);
@@ -63,7 +64,7 @@ export const pushRepo = action({
         name: args.repo,
         description: args.description ?? "Deployed from Freebuff",
         private: false,
-        auto_init: false,
+        auto_init: true,
       });
     }
     const branch = (repoInfo.default_branch as string) ?? "main";
@@ -78,7 +79,19 @@ export const pushRepo = action({
       );
       parentSha = (ref.object as { sha: string }).sha;
     } catch {
-      /* no commits yet */
+      // No commits yet (e.g. a repo created without auto_init). GitHub's Git
+      // Data API rejects blobs on a zero-commit repo with "409 Git Repository
+      // is empty", so seed a first commit via the Contents API first.
+      await gh(token, "PUT", `/repos/${OWNER}/${args.repo}/contents/README.md`, {
+        message: `Initial commit for ${args.repo}`,
+        content: Buffer.from(`# ${args.repo}\n`).toString("base64"),
+      });
+      const ref = await gh(
+        token,
+        "GET",
+        `/repos/${OWNER}/${args.repo}/git/ref/heads/${branch}`,
+      );
+      parentSha = (ref.object as { sha: string }).sha;
     }
 
     // 3) Create a blob per file, then a tree, then a commit, then update the ref.
@@ -126,7 +139,8 @@ export const pushRepo = action({
       });
     }
 
-    // 4) Optionally enable GitHub Pages (workflow-based deploys).
+    // 4) Optionally enable GitHub Pages with the GitHub Actions build type
+    //    (the workflow in .github/workflows/deploy.yml publishes the site).
     let pages = "not-enabled";
     if (args.enablePages) {
       try {
@@ -135,7 +149,16 @@ export const pushRepo = action({
         });
         pages = "enabled";
       } catch (e) {
-        pages = `enable-failed: ${(e as Error).message.slice(0, 120)}`;
+        // Pages already exists (GitHub auto-enables it for *.github.io)
+        // with the default branch-based source — switch it to Actions.
+        try {
+          await gh(token, "PUT", `/repos/${OWNER}/${args.repo}/pages`, {
+            build_type: "workflow",
+          });
+          pages = "enabled (switched to workflow)";
+        } catch (e2) {
+          pages = `enable-failed: ${(e2 as Error).message.slice(0, 120)}`;
+        }
       }
     }
 
