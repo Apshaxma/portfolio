@@ -8,7 +8,6 @@ import { defineConfig } from "vite";
 // the vlyPlugin, which requires platform services unavailable in this build
 // container. Not used by the dev server.
 export default defineConfig({
-  base: "/portfolio/",
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
